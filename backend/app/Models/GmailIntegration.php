@@ -103,7 +103,7 @@ class GmailIntegration extends Model
             return null;
         }
 
-        $response = \Illuminate\Support\Facades\Http::asForm()->post(
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->asForm()->post(
             'https://oauth2.googleapis.com/token',
             [
                 'grant_type'    => 'refresh_token',

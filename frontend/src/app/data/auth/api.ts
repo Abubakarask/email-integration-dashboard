@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, LoginRequest } from './types';
+import { AuthResponse, LoginRequest, RegisterRequest } from './types';
 
 export interface GmailStatusResponse {
   status: 'connected' | 'not_connected';
@@ -29,6 +29,14 @@ apiClient.interceptors.request.use((config) => {
 export const authApi = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/login', data);
+    if (response.data.access_token) {
+      localStorage.setItem('access_token', response.data.access_token);
+    }
+    return response.data;
+  },
+
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/register', data);
     if (response.data.access_token) {
       localStorage.setItem('access_token', response.data.access_token);
     }

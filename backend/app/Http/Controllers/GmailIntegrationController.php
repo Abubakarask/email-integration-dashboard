@@ -88,7 +88,7 @@ class GmailIntegrationController extends Controller
         }
 
         // Exchange code for tokens using PKCE verifier
-        $tokenResponse = Http::asForm()->post(self::TOKEN_URL, [
+        $tokenResponse = Http::withoutVerifying()->asForm()->post(self::TOKEN_URL, [
             'grant_type'    => 'authorization_code',
             'code'          => $code,
             'client_id'     => config('services.google.client_id'),
@@ -112,7 +112,8 @@ class GmailIntegrationController extends Controller
         }
 
         // Fetch Google user info — mirrors your verify_google_id_token() + decoded.get("email")
-        $userInfo = Http::withToken($accessToken)
+        $userInfo = Http::withoutVerifying()
+                        ->withToken($accessToken)
                         ->get('https://www.googleapis.com/oauth2/v3/userinfo')
                         ->json();
 
