@@ -10,16 +10,26 @@ function ProtectedLayout() {
   if (!token) return <Navigate to="/login" replace />;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0a0a0a' }}>
-      <Sidebar />
-      <main style={{ flex: 1, overflow: 'auto' }}>
-        <Routes>
-          <Route path="/dashboard"    element={<Dashboard />} />
-          <Route path="/messages"     element={<Messages />} />
-          <Route path="/integrations" element={<Integrations />} />
-          <Route path="*"             element={<Navigate to="/dashboard" />} />
-        </Routes>
-      </main>
+    <div style={{ backgroundColor: '#000000', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ 
+        display: 'flex', 
+        height: '100vh', 
+        width: '100%',
+        maxWidth: '1280px', 
+        backgroundColor: '#0a0a0a',
+        borderLeft: '1px solid #1e1e1e',
+        borderRight: '1px solid #1e1e1e',
+      }}>
+        <Sidebar />
+        <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <Routes>
+            <Route path="/dashboard"    element={<Dashboard />} />
+            <Route path="/messages"     element={<Messages />} />
+            <Route path="/integrations" element={<Integrations />} />
+            <Route path="*"             element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 }

@@ -79,7 +79,8 @@ class MessageController extends Controller
         }
 
         // Send via Gmail API — pass threadId to keep in same thread
-        $response = Http::withToken($accessToken)
+        $response = Http::withoutVerifying()
+            ->withToken($accessToken)
             ->post('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', [
                 'raw'      => $encoded,
                 'threadId' => $thread->gmail_thread_id,

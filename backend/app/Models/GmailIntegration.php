@@ -11,6 +11,8 @@ class GmailIntegration extends Model
     protected $fillable = [
         'user_id',
         'status',                // string: pending|active|expired|revoked|error|disabled
+        'sync_status',           // string: not_started|in_progress|completed|failed
+        'sync_message',          // text    
         'access_token',          // string|null — encrypted in production
         'refresh_token',         // string|null — encrypted in production
         'google_user_id',        // string|null — Google's "sub" from id_token

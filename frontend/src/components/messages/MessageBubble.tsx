@@ -115,6 +115,7 @@ const styles = {
     borderRadius: 'var(--radius-md)',
     border: '1px solid var(--border)',
     overflow: 'hidden',
+    flexShrink: 0,
   },
   received: { backgroundColor: 'var(--bg-elevated)' },
   sent: {

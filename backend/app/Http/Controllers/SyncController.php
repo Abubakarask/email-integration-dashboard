@@ -60,4 +60,27 @@ class SyncController extends Controller
 
         return response()->json(['message' => 'Incremental re-sync started.']);
     }
+
+    /**
+     * Get the current background synchronization status
+     * GET /api/gmail/sync-status
+     * Header: Authorization: Bearer {token}
+     */
+    public function status(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $integration = GmailIntegration::where('user_id', $user->id)->first();
+
+        if (!$integration) {
+            return response()->json([
+                'status' => 'not_connected',
+                'message' => 'No integration found.',
+            ]);
+        }
+
+        return response()->json([
+            'status' => $integration->sync_status, // not_started, in_progress, completed, failed
+            'message' => $integration->sync_message,
+        ]);
+    }
 }

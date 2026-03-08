@@ -7,6 +7,7 @@ use App\Http\Controllers\SyncController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\DashboardController;
 
 // ── Public routes (no token) ──────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
@@ -27,8 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/gmail/disconnect',[GmailIntegrationController::class, 'disconnect']);
 
     // Sync
-    Route::post('/gmail/sync',   [SyncController::class, 'sync']);
-    Route::post('/gmail/resync', [SyncController::class, 'resync']);
+    Route::post('/gmail/sync',        [SyncController::class, 'sync']);
+    Route::post('/gmail/resync',      [SyncController::class, 'resync']);
+    Route::get('/gmail/sync-status',  [SyncController::class, 'status']);
 
     // Threads
     Route::get('/threads',      [ThreadController::class, 'index']);
@@ -36,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reply
     Route::post('/threads/{id}/reply', [MessageController::class, 'reply']);
+
+    // Dashboard Stats
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     // Attachment download
     Route::get('/attachments/{messageId}/{attachmentId}', [AttachmentController::class, 'download']);

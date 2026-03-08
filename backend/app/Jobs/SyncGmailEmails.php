@@ -37,18 +37,34 @@ class SyncGmailEmails implements ShouldQueue
             return;
         }
 
+        $integration->update([
+            'sync_status' => 'in_progress',
+            'sync_message' => 'Syncing emails in background...',
+        ]);
+
         try {
+            Log::info("SyncGmailEmails: Starting sync for integration {$this->integrationId} (Days: " . ($this->days ?? 'incremental') . ")");
             if ($this->days === null && $integration->last_history_id) {
                 // Incremental sync — only fetch changes since last sync
+                Log::info("SyncGmailEmails [{$this->integrationId}]: Executing incremental sync using historyId: {$integration->last_history_id}");
                 $this->incrementalSync($integration, $accessToken);
             } else {
                 // Full sync — fetch all threads from date range
+                Log::info("SyncGmailEmails [{$this->integrationId}]: Executing full sync for past {$this->days} days.");
                 $this->fullSync($integration, $accessToken);
             }
 
-            $integration->update(['last_synced_at' => now()]);
+            $integration->update([
+                'last_synced_at' => now(),
+                'sync_status' => 'completed',
+                'sync_message' => 'Sync completed successfully',
+            ]);
         } catch (\Exception $e) {
             $integration->markError('Sync failed: ' . $e->getMessage());
+            $integration->update([
+                'sync_status' => 'failed',
+                'sync_message' => $e->getMessage(),
+            ]);
             Log::error("SyncGmailEmails error: " . $e->getMessage());
         }
     }
@@ -58,7 +74,9 @@ class SyncGmailEmails implements ShouldQueue
     private function fullSync(GmailIntegration $integration, string $token): void
     {
         $afterDate  = now()->subDays($this->days ?? 30)->format('Y/m/d');
+        Log::info("SyncGmailEmails [{$integration->id}]: Fetching threads updated after {$afterDate}");
         $threadIds  = $this->fetchAllThreadIds($token, $afterDate);
+        Log::info("SyncGmailEmails [{$integration->id}]: Found " . count($threadIds) . " threads to process.");
         $lastHistoryId = null;
 
         foreach ($threadIds as $threadId) {
@@ -94,7 +112,8 @@ class SyncGmailEmails implements ShouldQueue
             ];
             if ($pageToken) $params['pageToken'] = $pageToken;
 
-            $response = Http::withToken($token)
+            $response = Http::withoutVerifying()
+                ->withToken($token)
                 ->get('https://gmail.googleapis.com/gmail/v1/users/me/threads', $params);
 
             if (!$response->ok()) break;
@@ -116,7 +135,8 @@ class SyncGmailEmails implements ShouldQueue
 
     private function incrementalSync(GmailIntegration $integration, string $token): void
     {
-        $response = Http::withToken($token)
+        $response = Http::withoutVerifying()
+            ->withToken($token)
             ->get('https://gmail.googleapis.com/gmail/v1/users/me/history', [
                 'startHistoryId' => $integration->last_history_id,
                 'historyTypes'   => 'messageAdded,messageDeleted',
@@ -125,12 +145,16 @@ class SyncGmailEmails implements ShouldQueue
 
         // 404 means historyId expired — fall back to full sync
         if ($response->status() === 404) {
+            Log::warning("SyncGmailEmails [{$integration->id}]: HistoryId expired, falling back to full sync");
             $this->days = $integration->synced_days ?? 30;
             $this->fullSync($integration, $token);
             return;
         }
 
-        if (!$response->ok()) return;
+        if (!$response->ok()) {
+            Log::error("SyncGmailEmails [{$integration->id}]: Incremental history fetch failed. Code: " . $response->status());
+            return;
+        }
 
         $data          = $response->json();
         $newHistoryId  = $data['historyId'] ?? null;
@@ -165,7 +189,8 @@ class SyncGmailEmails implements ShouldQueue
 
     private function fetchThread(string $token, string $threadId): ?array
     {
-        $response = Http::withToken($token)
+        $response = Http::withoutVerifying()
+            ->withToken($token)
             ->get("https://gmail.googleapis.com/gmail/v1/users/me/threads/{$threadId}", [
                 'format' => 'full',
             ]);
