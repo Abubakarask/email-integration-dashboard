@@ -195,7 +195,23 @@ export default function Integrations() {
         </div>
 
         {isLoading ? (
-          <div style={{ color: '#374151', fontSize: '13px' }}>Checking status...</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
+             <div className="skeleton-line" style={{ width: '60%', height: '14px' }} />
+             <div className="skeleton-line" style={{ width: '120px', height: '36px', borderRadius: '8px' }} />
+             <style>{`
+              @keyframes shimmer {
+                0% { background-position: -400px 0; }
+                100% { background-position: 400px 0; }
+              }
+              .skeleton-line {
+                background: #21262d;
+                background-image: linear-gradient(90deg, #21262d 0px, #30363d 40px, #21262d 80px);
+                background-size: 600px;
+                animation: shimmer 1.5s infinite linear;
+                border-radius: 4px;
+              }
+             `}</style>
+          </div>
         ) : status === 'connected' ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

@@ -34,9 +34,36 @@ export default function Messages() {
     setShowSyncModal(false);
     try {
       await api.post('/gmail/sync', { days });
-      // Poll for threads after a brief delay (job is async)
-      setTimeout(() => fetchThreads(), 3000);
-    } finally {
+      
+      // Actively poll the backend job status every 3 seconds while the background queue runs
+      let attempts = 0;
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        try {
+          const statusRes = await api.get('/gmail/sync-status');
+          
+          if (statusRes.data.status === 'completed') {
+            clearInterval(pollInterval);
+            setSyncing(false);
+            // Single explicit pull now that sync is perfectly complete
+            await fetchThreads();
+          } else if (statusRes.data.status === 'failed') {
+            clearInterval(pollInterval);
+            setSyncing(false);
+            // Handle fail state (Optional logging here)
+          }
+
+          if (attempts > 30) {
+            // timeout after 90 seconds
+            clearInterval(pollInterval);
+            setSyncing(false);
+          }
+        } catch (e) {
+          // Silent catch on poll fails
+        }
+      }, 3000);
+      
+    } catch (err: any) {
       setSyncing(false);
     }
   }

@@ -28,7 +28,31 @@ export default function ThreadList({
   return (
     <div style={styles.panel}>
       {loading ? (
-        <div style={styles.empty}>Loading…</div>
+        <div style={styles.list}>
+          {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            <div key={i} style={styles.item}>
+              <div style={styles.itemTop}>
+                <div className="skeleton-line" style={{ width: '120px', height: '12px' }} />
+                <div className="skeleton-line" style={{ width: '40px', height: '10px' }} />
+              </div>
+              <div className="skeleton-line" style={{ width: '80%', height: '14px', marginBottom: '8px', marginTop: '4px' }} />
+              <div className="skeleton-line" style={{ width: '95%', height: '12px' }} />
+            </div>
+          ))}
+          <style>{`
+            @keyframes shimmer {
+              0% { background-position: -400px 0; }
+              100% { background-position: 400px 0; }
+            }
+            .skeleton-line {
+              background: #21262d;
+              background-image: linear-gradient(90deg, #21262d 0px, #30363d 40px, #21262d 80px);
+              background-size: 600px;
+              animation: shimmer 1.5s infinite linear;
+              border-radius: 4px;
+            }
+          `}</style>
+        </div>
       ) : threads.length === 0 ? (
         <div style={styles.empty}>No threads yet. Sync your inbox.</div>
       ) : (
