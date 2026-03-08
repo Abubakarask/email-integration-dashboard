@@ -46,6 +46,11 @@ class GmailIntegration extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function threads(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EmailThread::class, 'integration_id');
+    }
+
     // ── Status helpers — mirrors your is_connected() pattern ──
 
     public function isConnected(): bool
