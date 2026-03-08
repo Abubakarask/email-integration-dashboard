@@ -3,7 +3,7 @@ import MessageBubble from './MessageBubble';
 import ReplyComposer from './ReplyComposer';
 import { apiClient as api } from '../../app/data/auth/api';
 
-export default function ThreadDetail({ thread, onReply }: { thread: any, onReply: () => void }) {
+export default function ThreadDetail({ thread, onReply, onBack }: { thread: any, onReply: () => void, onBack: () => void }) {
   const [detail, setDetail]   = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const bottomRef             = useRef<HTMLDivElement>(null);
@@ -35,29 +35,39 @@ export default function ThreadDetail({ thread, onReply }: { thread: any, onReply
 
   if (!thread) {
     return (
-      <div style={styles.empty}>
-        <div style={styles.emptyIcon}>✉</div>
-        <div style={styles.emptyText}>Select a thread to read</div>
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 text-zinc-600 font-mono text-sm w-full">
+        <div className="text-3xl opacity-20">✉</div>
+        <div>Select a thread to read</div>
       </div>
     );
   }
 
   if (loading) {
-    return <div style={styles.loading}>Loading thread…</div>;
+    return <div className="flex-1 flex items-center justify-center font-mono text-xs text-zinc-500 w-full animate-pulse">Loading thread…</div>;
   }
 
   return (
-    <div style={styles.panel}>
+    <div className="flex-1 flex flex-col overflow-hidden w-full">
+      {/* Mobile back button */}
+      <div className="md:hidden px-6 pt-4 shrink-0">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-cyan-400 font-mono text-xs cursor-pointer bg-transparent border-none p-0"
+        >
+          ← Back to threads
+        </button>
+      </div>
+
       {/* Thread header */}
-      <div style={styles.header}>
-        <div style={styles.subject}>{detail?.subject || '(no subject)'}</div>
-        <div style={styles.meta}>
+      <div className="px-6 py-4 border-b border-zinc-800 shrink-0">
+        <div className="text-base font-semibold text-zinc-100 mb-1">{detail?.subject || '(no subject)'}</div>
+        <div className="font-mono text-xs text-zinc-500 mt-1">
           {detail?.participants?.join(' · ')} · {detail?.message_count} messages
         </div>
       </div>
 
       {/* Messages */}
-      <div style={styles.messages}>
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {(detail?.messages ?? []).map((msg: any) => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
@@ -69,59 +79,3 @@ export default function ThreadDetail({ thread, onReply }: { thread: any, onReply
     </div>
   );
 }
-
-const styles = {
-  panel: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    overflow: 'hidden',
-  },
-  empty: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-  },
-  emptyIcon: { fontSize: '32px', opacity: 0.2 },
-  emptyText: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '13px',
-    color: 'var(--text-muted)',
-  },
-  loading: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    color: 'var(--text-muted)',
-  },
-  header: {
-    padding: '20px 28px 16px',
-    borderBottom: '1px solid var(--border)',
-    flexShrink: 0,
-  },
-  subject: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-    marginBottom: '6px',
-  },
-  meta: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-  messages: {
-    flex: 1,
-    overflowY: 'auto' as const,
-    padding: '20px 28px',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '16px',
-  },
-};

@@ -11,7 +11,8 @@ export default function Messages() {
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [syncing, setSyncing]           = useState(false);
   const [page, setPage]                 = useState(1);
-  const [meta, setMeta]                 = useState<any>(null);   // pagination meta
+  const [meta, setMeta]                 = useState<any>(null);
+  const [showDetail, setShowDetail]     = useState(false);
 
   useEffect(() => { fetchThreads(); }, [page]);
 
@@ -22,7 +23,6 @@ export default function Messages() {
       setThreads(res.data.data ?? []);
       setMeta(res.data);
     } catch (err: any) {
-      // Gmail not connected → show sync prompt
       if (err.response?.status === 400) setShowSyncModal(true);
     } finally {
       setLoading(false);
@@ -35,7 +35,6 @@ export default function Messages() {
     try {
       await api.post('/gmail/sync', { days });
       
-      // Actively poll the backend job status every 3 seconds while the background queue runs
       let attempts = 0;
       const pollInterval = setInterval(async () => {
         attempts++;
@@ -45,16 +44,13 @@ export default function Messages() {
           if (statusRes.data.status === 'completed') {
             clearInterval(pollInterval);
             setSyncing(false);
-            // Single explicit pull now that sync is perfectly complete
             await fetchThreads();
           } else if (statusRes.data.status === 'failed') {
             clearInterval(pollInterval);
             setSyncing(false);
-            // Handle fail state (Optional logging here)
           }
 
           if (attempts > 30) {
-            // timeout after 90 seconds
             clearInterval(pollInterval);
             setSyncing(false);
           }
@@ -68,39 +64,61 @@ export default function Messages() {
     }
   }
 
+  const handleSelectThread = (threadId: string) => {
+    setSelected(threadId);
+    setShowDetail(true);
+  };
+
+  const handleBack = () => {
+    setShowDetail(false);
+  };
+
   return (
-    <div style={styles.page}>
+    <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
       {/* Header bar */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <span style={styles.title}>Messages</span>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-base font-semibold text-zinc-100">Messages</span>
           {meta && (
-            <span style={styles.count}>{meta.total ?? 0} threads</span>
+            <span className="font-mono text-xs text-zinc-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-full">
+              {meta.total ?? 0} threads
+            </span>
           )}
         </div>
-        <div style={styles.headerRight}>
-          {syncing && <span style={styles.syncingBadge}>⟳ Syncing…</span>}
-          <button style={styles.syncBtn} onClick={() => setShowSyncModal(true)}>
+        <div className="flex items-center gap-3">
+          {syncing && <span className="font-mono text-xs text-cyan-400 animate-pulse">⟳ Syncing…</span>}
+          <button 
+            className="font-mono text-xs font-semibold bg-cyan-400 text-black border-none rounded-lg px-3.5 py-2 cursor-pointer transition hover:bg-cyan-300" 
+            onClick={() => setShowSyncModal(true)}
+          >
             Sync Inbox
           </button>
         </div>
       </div>
 
       {/* Two-panel layout */}
-      <div style={styles.panels}>
-        <ThreadList
-          threads={threads}
-          loading={loading}
-          selected={selectedThread?.id}
-          onSelect={setSelected}
-          page={page}
-          meta={meta}
-          onPageChange={setPage}
-        />
-        <ThreadDetail
-          thread={selectedThread}
-          onReply={fetchThreads}
-        />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel */}
+        <div className={`${showDetail ? 'hidden md:flex' : 'flex'} w-full md:w-80 shrink-0 border-r border-zinc-800 flex-col`}>
+          <ThreadList
+            threads={threads}
+            loading={loading}
+            selected={selectedThread}
+            onSelect={handleSelectThread}
+            page={page}
+            meta={meta}
+            onPageChange={setPage}
+          />
+        </div>
+        
+        {/* Right Panel */}
+        <div className={`${!showDetail ? 'hidden md:flex' : 'flex'} flex-1 flex-col overflow-hidden`}>
+          <ThreadDetail
+            thread={threads.find(t => t.id === selectedThread)}
+            onReply={fetchThreads}
+            onBack={handleBack}
+          />
+        </div>
       </div>
 
       {showSyncModal && (
@@ -112,60 +130,3 @@ export default function Messages() {
     </div>
   );
 }
-
-const styles = {
-  page: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    height: '100vh',
-    backgroundColor: 'var(--bg-base)',
-    overflow: 'hidden',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '16px 24px',
-    borderBottom: '1px solid var(--border)',
-    flexShrink: 0,
-  },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: '12px' },
-  title: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '15px',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-  },
-  count: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-    backgroundColor: 'var(--bg-elevated)',
-    border: '1px solid var(--border)',
-    padding: '2px 8px',
-    borderRadius: '20px',
-  },
-  headerRight: { display: 'flex', alignItems: 'center', gap: '12px' },
-  syncingBadge: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    color: 'var(--accent)',
-    animation: 'pulse 1.5s infinite',
-  },
-  syncBtn: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    fontWeight: '500',
-    backgroundColor: 'var(--accent)',
-    color: '#000',
-    border: 'none',
-    borderRadius: 'var(--radius-sm)',
-    padding: '7px 14px',
-    cursor: 'pointer',
-  },
-  panels: {
-    display: 'flex',
-    flex: 1,
-    overflow: 'hidden',
-  },
-};

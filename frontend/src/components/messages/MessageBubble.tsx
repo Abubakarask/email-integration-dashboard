@@ -6,24 +6,30 @@ export default function MessageBubble({ message }: { message: any }) {
     .join(', ');
 
   return (
-    <div style={{ ...styles.bubble, ...(isSent ? styles.sent : styles.received) }}>
+    <div className={`rounded-xl border overflow-hidden flex-shrink-0 ${isSent ? 'bg-cyan-400/5 border-cyan-400/20' : 'bg-zinc-900 border-zinc-800'}`}>
       {/* Message header */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <div style={styles.avatar}>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center font-mono text-xs font-bold text-cyan-400 shrink-0">
             {(message.from_name || message.from_email)?.[0]?.toUpperCase()}
           </div>
           <div>
-            <div style={styles.fromName}>
-              {message.from_name || message.from_email}
-              {isSent && <span style={styles.sentLabel}>You</span>}
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-semibold text-zinc-100">
+                {message.from_name || message.from_email}
+              </span>
+              {isSent && (
+                <span className="font-mono text-[10px] bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 px-2 py-0.5 rounded-full">
+                  You
+                </span>
+              )}
             </div>
-            <div style={styles.fromEmail}>
+            <div className="font-mono text-[10px] text-zinc-500 mt-0.5">
               {message.from_email} → {toList}
             </div>
           </div>
         </div>
-        <div style={styles.time}>
+        <div className="font-mono text-[10px] text-zinc-600 shrink-0">
           {message.sent_at
             ? new Date(message.sent_at).toLocaleString([], {
                 month: 'short', day: 'numeric',
@@ -59,7 +65,7 @@ export default function MessageBubble({ message }: { message: any }) {
               <body>${message.body_html}</body>
             </html>
           `}
-          style={styles.iframe}
+          className="w-full border-none block min-h-[60px] px-4 bg-transparent mt-2"
           sandbox="allow-same-origin"
           scrolling="no"
           onLoad={(e: any) => {
@@ -74,7 +80,7 @@ export default function MessageBubble({ message }: { message: any }) {
 
       {/* Attachments */}
       {message.attachments?.length > 0 && (
-        <div style={styles.attachments}>
+        <div className="flex flex-wrap gap-2 px-4 py-3 border-t border-zinc-800">
           {message.attachments.map((att: any, i: number) => (
             <AttachmentChip
               key={i}
@@ -103,105 +109,14 @@ function AttachmentChip({ messageId, attachment }: { messageId: number, attachme
   }
 
   return (
-    <button style={styles.chip} onClick={handleDownload}>
-      <span style={styles.chipIcon}>📎</span>
-      <span style={styles.chipName}>{attachment.filename}</span>
+    <button 
+      onClick={handleDownload}
+      className="inline-flex items-center gap-1.5 bg-zinc-800 border border-zinc-700 rounded-md px-2.5 py-1.5 text-xs font-mono text-zinc-300 cursor-pointer hover:border-zinc-500 transition"
+    >
+      <span className="text-xs">📎</span>
+      <span className="max-w-[160px] overflow-hidden text-ellipsis whitespace-nowrap">
+        {attachment.filename}
+      </span>
     </button>
   );
 }
-
-const styles = {
-  bubble: {
-    borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--border)',
-    overflow: 'hidden',
-    flexShrink: 0,
-  },
-  received: { backgroundColor: 'var(--bg-elevated)' },
-  sent: {
-    backgroundColor: 'var(--sent-bg)',
-    borderColor: 'var(--sent-border)',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    padding: '12px 16px',
-    borderBottom: '1px solid var(--border)',
-  },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: '10px' },
-  avatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    backgroundColor: 'var(--bg-hover)',
-    border: '1px solid var(--border-mid)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '13px',
-    fontWeight: '600',
-    color: 'var(--accent)',
-    flexShrink: 0,
-  },
-  fromName: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  sentLabel: {
-    fontSize: '10px',
-    backgroundColor: 'var(--accent-dim)',
-    color: 'var(--accent)',
-    border: '1px solid var(--accent-border)',
-    padding: '1px 6px',
-    borderRadius: '10px',
-  },
-  fromEmail: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '10px',
-    color: 'var(--text-muted)',
-    marginTop: '2px',
-  },
-  time: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '10px',
-    color: 'var(--text-muted)',
-    flexShrink: 0,
-  },
-  iframe: {
-    width: '100%',
-    border: 'none',
-    display: 'block',
-    minHeight: '60px',
-    padding: '0 16px',
-    backgroundColor: 'transparent',
-  },
-  attachments: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '8px',
-    padding: '10px 16px',
-    borderTop: '1px solid var(--border)',
-  },
-  chip: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'var(--bg-hover)',
-    border: '1px solid var(--border-mid)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '5px 10px',
-    cursor: 'pointer',
-    color: 'var(--text-secondary)',
-    fontSize: '12px',
-    fontFamily: 'var(--font-mono)',
-  },
-  chipIcon: { fontSize: '12px' },
-  chipName: { maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-};

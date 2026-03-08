@@ -20,71 +20,59 @@ export default function ThreadList({
   threads: any[], 
   loading: boolean, 
   selected: string | null, 
-  onSelect: (thread: any) => void, 
+  onSelect: (threadId: string) => void, 
   page: number, 
   meta: any, 
   onPageChange: (updater: (p: number) => number) => void 
 }) {
   return (
-    <div style={styles.panel}>
+    <>
       {loading ? (
-        <div style={styles.list}>
+        <div className="flex-1 overflow-y-auto w-full">
           {[1, 2, 3, 4, 5, 6, 7].map(i => (
-            <div key={i} style={styles.item}>
-              <div style={styles.itemTop}>
-                <div className="skeleton-line" style={{ width: '120px', height: '12px' }} />
-                <div className="skeleton-line" style={{ width: '40px', height: '10px' }} />
+            <div key={i} className="px-4 py-3.5 border-b border-zinc-800 animate-pulse">
+              <div className="flex justify-between mb-2">
+                <div className="h-3 bg-zinc-800 rounded w-28" />
+                <div className="h-2.5 bg-zinc-800 rounded w-10" />
               </div>
-              <div className="skeleton-line" style={{ width: '80%', height: '14px', marginBottom: '8px', marginTop: '4px' }} />
-              <div className="skeleton-line" style={{ width: '95%', height: '12px' }} />
+              <div className="h-3.5 bg-zinc-800 rounded w-4/5 mb-2 mt-1" />
+              <div className="h-3 bg-zinc-800 rounded w-[95%]" />
             </div>
           ))}
-          <style>{`
-            @keyframes shimmer {
-              0% { background-position: -400px 0; }
-              100% { background-position: 400px 0; }
-            }
-            .skeleton-line {
-              background: #21262d;
-              background-image: linear-gradient(90deg, #21262d 0px, #30363d 40px, #21262d 80px);
-              background-size: 600px;
-              animation: shimmer 1.5s infinite linear;
-              border-radius: 4px;
-            }
-          `}</style>
         </div>
       ) : threads.length === 0 ? (
-        <div style={styles.empty}>No threads yet. Sync your inbox.</div>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 font-mono text-xs text-zinc-500 text-center w-full">
+          No threads yet. Sync your inbox.
+        </div>
       ) : (
         <>
-          <div style={styles.list}>
+          <div className="flex-1 overflow-y-auto w-full">
             {threads.map(thread => (
               <div
                 key={thread.id}
-                style={{
-                  ...styles.item,
-                  ...(selected === thread.id ? styles.itemActive : {}),
-                }}
-                onClick={() => onSelect(thread)}
+                className={`px-4 py-3.5 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/50 transition ${selected === thread.id ? 'bg-cyan-400/5 border-l-2 border-l-cyan-400' : 'border-l-2 border-l-transparent'}`}
+                onClick={() => onSelect(thread.id)}
               >
                 {/* Top row: participants + date */}
-                <div style={styles.itemTop}>
-                  <span style={styles.participants}>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-mono text-xs font-semibold text-zinc-100 truncate pr-2">
                     {(thread.participants ?? []).slice(0, 2).join(', ')}
                   </span>
-                  <span style={styles.date}>{formatDate(thread.last_message_at)}</span>
+                  <span className="font-mono text-xs text-zinc-600 shrink-0">{formatDate(thread.last_message_at)}</span>
                 </div>
 
                 {/* Subject */}
-                <div style={styles.subject}>
+                <div className="text-sm font-medium text-zinc-200 truncate mt-0.5">
                   {thread.subject || '(no subject)'}
                 </div>
 
                 {/* Snippet + message count */}
-                <div style={styles.itemBottom}>
-                  <span style={styles.snippet}>{thread.snippet}</span>
+                <div className="flex justify-between items-center mt-1 gap-2">
+                  <span className="font-mono text-xs text-zinc-500 truncate">{thread.snippet}</span>
                   {thread.message_count > 1 && (
-                    <span style={styles.msgCount}>{thread.message_count}</span>
+                    <span className="font-mono text-[10px] text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded-full shrink-0 leading-none">
+                      {thread.message_count}
+                    </span>
                   )}
                 </div>
               </div>
@@ -93,17 +81,17 @@ export default function ThreadList({
 
           {/* Pagination */}
           {meta && meta.last_page > 1 && (
-            <div style={styles.pagination}>
+            <div className="flex items-center justify-center gap-3 p-3 border-t border-zinc-800 w-full shrink-0">
               <button
-                style={styles.pageBtn}
+                className="font-mono text-xs bg-transparent border border-zinc-700 text-zinc-400 rounded px-2.5 py-1 cursor-pointer hover:text-zinc-200 hover:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
                 disabled={page === 1}
                 onClick={() => onPageChange(p => p - 1)}
               >
                 ←
               </button>
-              <span style={styles.pageLabel}>{page} / {meta.last_page}</span>
+              <span className="font-mono text-[11px] text-zinc-600">{page} / {meta.last_page}</span>
               <button
-                style={styles.pageBtn}
+                className="font-mono text-xs bg-transparent border border-zinc-700 text-zinc-400 rounded px-2.5 py-1 cursor-pointer hover:text-zinc-200 hover:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed"
                 disabled={page === meta.last_page}
                 onClick={() => onPageChange(p => p + 1)}
               >
@@ -113,112 +101,6 @@ export default function ThreadList({
           )}
         </>
       )}
-    </div>
+    </>
   );
 }
-
-const styles = {
-  panel: {
-    width: '320px',
-    flexShrink: 0,
-    borderRight: '1px solid var(--border)',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    overflow: 'hidden',
-  },
-  list: { flex: 1, overflowY: 'auto' as const },
-  empty: {
-    padding: '40px 24px',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    color: 'var(--text-muted)',
-    textAlign: 'center' as const,
-  },
-  item: {
-    padding: '14px 16px',
-    borderBottom: '1px solid var(--border)',
-    cursor: 'pointer',
-    transition: 'background 0.1s',
-  },
-  itemActive: {
-    backgroundColor: 'var(--accent-dim)',
-    borderLeft: '2px solid var(--accent)',
-  },
-  itemTop: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '4px',
-  },
-  participants: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
-    fontWeight: '500',
-    color: 'var(--text-primary)',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    maxWidth: '200px',
-  },
-  date: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '10px',
-    color: 'var(--text-muted)',
-    flexShrink: 0,
-  },
-  subject: {
-    fontSize: '13px',
-    fontWeight: '500',
-    color: 'var(--text-primary)',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    marginBottom: '4px',
-  },
-  itemBottom: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  snippet: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
-    color: 'var(--text-secondary)',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    maxWidth: '230px',
-  },
-  msgCount: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '10px',
-    color: 'var(--accent)',
-    backgroundColor: 'var(--accent-dim)',
-    border: '1px solid var(--accent-border)',
-    padding: '1px 6px',
-    borderRadius: '10px',
-    flexShrink: 0,
-  },
-  pagination: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-    padding: '12px',
-    borderTop: '1px solid var(--border)',
-  },
-  pageBtn: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '13px',
-    background: 'none',
-    border: '1px solid var(--border-mid)',
-    color: 'var(--text-secondary)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '4px 10px',
-    cursor: 'pointer',
-  },
-  pageLabel: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-};

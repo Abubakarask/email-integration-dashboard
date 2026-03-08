@@ -35,47 +35,6 @@ const NAV_ITEMS = [
   },
 ];
 
-const styles = {
-  sidebar: {
-    width: '220px',
-    height: '100vh',
-    backgroundColor: '#0f0f0f',
-    borderRight: '1px solid #1e1e1e',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    padding: '24px 12px',
-    gap: '4px',
-    flexShrink: 0,
-    boxSizing: 'border-box' as const,
-  },
-  logo: {
-    color: '#ffffff',
-    fontFamily: "'DM Mono', monospace",
-    fontSize: '15px',
-    fontWeight: '600',
-    letterSpacing: '-0.02em',
-    padding: '0 12px',
-    marginBottom: '32px',
-  },
-  accent: { color: '#4ade80' },
-  navLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    padding: '10px 12px',
-    borderRadius: '8px',
-    textDecoration: 'none',
-    color: '#6b7280',
-    fontSize: '14px',
-    fontFamily: "'DM Mono', monospace",
-    transition: 'all 0.15s ease',
-  },
-  navLinkActive: {
-    color: '#ffffff',
-    backgroundColor: '#1a1a1a',
-  },
-};
-
 export default function Sidebar() {
   function handleLogout() {
     localStorage.removeItem('access_token');
@@ -83,47 +42,55 @@ export default function Sidebar() {
   }
 
   return (
-    <aside style={styles.sidebar}>
-      <div style={styles.logo}>
-        Beyond<span style={styles.accent}>Chats</span>
-      </div>
+    <>
+      <aside className="hidden md:flex fixed lg:static w-56 h-screen bg-zinc-900 border-r border-zinc-800 flex-col p-4 z-40">
+        <div className="font-mono text-sm font-semibold text-zinc-100 mb-8 px-2">
+          Beyond<span className="text-cyan-400">Chats</span>
+        </div>
 
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
+        <nav className="flex flex-col gap-2 flex-1">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition font-mono ${isActive ? 'text-zinc-100 bg-zinc-800 border-l-2 border-cyan-400' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60'}`
+              }
+            >
+              {item.icon}
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition font-mono w-full cursor-pointer bg-transparent border-none text-left"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+      </aside>
+
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 flex justify-around py-3 z-50">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            style={({ isActive }) => ({
-              ...styles.navLink,
-              ...(isActive ? styles.navLinkActive : {}),
-            })}
+            className={({ isActive }) =>
+              `flex flex-col items-center gap-1 text-xs font-mono transition ${isActive ? 'text-cyan-400' : 'text-zinc-400 hover:text-zinc-100'}`
+            }
           >
             {item.icon}
-            {item.label}
+            <span className="hidden sm:inline">{item.label}</span>
           </NavLink>
         ))}
       </nav>
-
-      <button
-        onClick={handleLogout}
-        style={{
-          ...styles.navLink,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          width: '100%',
-          color: '#4b5563',
-          fontSize: '13px',
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-          <polyline points="16 17 21 12 16 7" />
-          <line x1="21" y1="12" x2="9" y2="12" />
-        </svg>
-        Logout
-      </button>
-    </aside>
+    </>
   );
 }

@@ -6,18 +6,21 @@ export default function SyncModal({ onSync, onClose }: { onSync: (days: number) 
   const [days, setDays] = useState(30);
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={e => e.stopPropagation()}>
-        <div style={styles.title}>Sync Gmail Inbox</div>
-        <div style={styles.desc}>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={onClose}>
+      <div 
+        className="bg-zinc-900 border border-zinc-800 rounded-xl p-7 w-80 flex flex-col gap-4" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="font-mono text-base font-semibold text-zinc-100">Sync Gmail Inbox</div>
+        <div className="font-mono text-xs text-zinc-400 leading-relaxed">
           How many days of emails do you want to sync?
         </div>
 
-        <div style={styles.presets}>
+        <div className="flex gap-2">
           {PRESETS.map(d => (
             <button
               key={d}
-              style={{ ...styles.preset, ...(days === d ? styles.presetActive : {}) }}
+              className={`flex-1 font-mono text-xs rounded-lg py-2 cursor-pointer transition ${days === d ? 'bg-cyan-400/10 border border-cyan-400/30 text-cyan-400' : 'bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-100'}`}
               onClick={() => setDays(d)}
             >
               {d}d
@@ -25,22 +28,30 @@ export default function SyncModal({ onSync, onClose }: { onSync: (days: number) 
           ))}
         </div>
 
-        <div style={styles.customRow}>
-          <span style={styles.customLabel}>Custom:</span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-xs text-zinc-500">Custom:</span>
           <input
             type="number"
             min="1"
             max="365"
             value={days}
             onChange={e => setDays(Number(e.target.value))}
-            style={styles.input as any}
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-zinc-100 font-mono text-sm w-full focus:outline-none focus:border-cyan-400 transition"
           />
-          <span style={styles.customLabel}>days</span>
+          <span className="font-mono text-xs text-zinc-500">days</span>
         </div>
 
-        <div style={styles.actions}>
-          <button style={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button style={styles.confirmBtn} onClick={() => onSync(days)}>
+        <div className="flex gap-2.5 justify-end mt-1">
+          <button 
+            className="font-mono text-xs bg-transparent border border-zinc-700 text-zinc-400 rounded-lg px-4 py-2 cursor-pointer hover:text-zinc-100 transition" 
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button 
+            className="bg-cyan-400 text-black font-mono font-semibold text-xs px-5 py-2 rounded-lg hover:bg-cyan-300 transition cursor-pointer" 
+            onClick={() => onSync(days)}
+          >
             Start Sync
           </button>
         </div>
@@ -48,99 +59,3 @@ export default function SyncModal({ onSync, onClose }: { onSync: (days: number) 
     </div>
   );
 }
-
-const styles = {
-  overlay: {
-    position: 'fixed' as const, inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    zIndex: 100,
-  },
-  modal: {
-    backgroundColor: 'var(--bg-panel)',
-    border: '1px solid var(--border-mid)',
-    borderRadius: 'var(--radius-md)',
-    padding: '28px',
-    width: '340px',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '16px',
-  },
-  title: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '15px',
-    fontWeight: '600',
-    color: 'var(--text-primary)',
-  },
-  desc: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    color: 'var(--text-secondary)',
-    lineHeight: '1.6',
-  },
-  presets: { display: 'flex', gap: '8px' },
-  preset: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    flex: 1,
-    padding: '8px',
-    backgroundColor: 'var(--bg-elevated)',
-    border: '1px solid var(--border-mid)',
-    borderRadius: 'var(--radius-sm)',
-    color: 'var(--text-secondary)',
-    cursor: 'pointer',
-  },
-  presetActive: {
-    backgroundColor: 'var(--accent-dim)',
-    borderColor: 'var(--accent-border)',
-    color: 'var(--accent)',
-  },
-  customRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  customLabel: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    color: 'var(--text-muted)',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: 'var(--bg-elevated)',
-    border: '1px solid var(--border-mid)',
-    borderRadius: 'var(--radius-sm)',
-    color: 'var(--text-primary)',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '13px',
-    padding: '7px 10px',
-    outline: 'none',
-  },
-  actions: {
-    display: 'flex',
-    gap: '10px',
-    justifyContent: 'flex-end',
-    marginTop: '4px',
-  },
-  cancelBtn: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    backgroundColor: 'transparent',
-    border: '1px solid var(--border-mid)',
-    color: 'var(--text-secondary)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '8px 16px',
-    cursor: 'pointer',
-  },
-  confirmBtn: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '12px',
-    fontWeight: '600',
-    backgroundColor: 'var(--accent)',
-    color: '#000',
-    border: 'none',
-    borderRadius: 'var(--radius-sm)',
-    padding: '8px 18px',
-    cursor: 'pointer',
-  },
-};

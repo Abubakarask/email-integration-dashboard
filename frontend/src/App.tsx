@@ -10,18 +10,10 @@ function ProtectedLayout() {
   if (!token) return <Navigate to="/login" replace />;
 
   return (
-    <div style={{ backgroundColor: '#000000', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ 
-        display: 'flex', 
-        height: '100vh', 
-        width: '100%',
-        maxWidth: '1280px', 
-        backgroundColor: '#0a0a0a',
-        borderLeft: '1px solid #1e1e1e',
-        borderRight: '1px solid #1e1e1e',
-      }}>
-        <Sidebar />
-        <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+    <div className="bg-black min-h-screen flex justify-center">
+      <div className="flex h-screen w-full max-w-[1280px] bg-zinc-950 border-l border-r border-zinc-900 overflow-hidden relative">
+        <Sidebar  />
+        <main className="flex-1 min-w-0 flex flex-col overflow-y-auto mb-14 md:mb-0">
           <Routes>
             <Route path="/dashboard"    element={<Dashboard />} />
             <Route path="/messages"     element={<Messages />} />

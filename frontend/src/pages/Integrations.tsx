@@ -1,121 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useGmailStatusQuery, useConnectGmailMutation, useDisconnectGmailMutation } from '../app/data/google';
 
-const styles = {
-  page: {
-    padding: '40px',
-    backgroundColor: '#0a0a0a',
-    minHeight: '100vh',
-    color: '#ffffff',
-    fontFamily: "'DM Mono', monospace",
-  },
-  heading: {
-    fontSize: '22px',
-    fontWeight: '600',
-    marginBottom: '8px',
-    letterSpacing: '-0.02em',
-  },
-  subheading: {
-    fontSize: '13px',
-    color: '#4b5563',
-    marginBottom: '40px',
-  },
-  card: {
-    backgroundColor: '#111111',
-    border: '1px solid #1e1e1e',
-    borderRadius: '12px',
-    padding: '28px',
-    maxWidth: '480px',
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '16px',
-  },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-  },
-  gmailIcon: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '8px',
-    backgroundColor: '#1a1a1a',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '20px',
-  },
-  cardTitle: { fontSize: '15px', fontWeight: '600', color: '#f9fafb' },
-  cardDesc: { fontSize: '12px', color: '#4b5563', lineHeight: '1.6' },
-  connectedBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    backgroundColor: '#052e16',
-    color: '#4ade80',
-    fontSize: '12px',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    border: '1px solid #14532d',
-  },
-  dot: {
-    width: '6px',
-    height: '6px',
-    borderRadius: '50%',
-    backgroundColor: '#4ade80',
-  },
-  email: {
-    fontSize: '12px',
-    color: '#6b7280',
-  },
-  connectBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    backgroundColor: '#ffffff',
-    color: '#0a0a0a',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '10px 18px',
-    fontSize: '13px',
-    fontFamily: "'DM Mono', monospace",
-    fontWeight: '600',
-    cursor: 'pointer',
-    alignSelf: 'flex-start',
-    transition: 'opacity 0.15s ease',
-  },
-  disconnectBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    backgroundColor: 'transparent',
-    color: '#ef4444',
-    border: '1px solid #1f2937',
-    borderRadius: '8px',
-    padding: '8px 14px',
-    fontSize: '12px',
-    fontFamily: "'DM Mono', monospace",
-    cursor: 'pointer',
-    alignSelf: 'flex-start',
-    transition: 'border-color 0.15s ease',
-  },
-  toast: (type: 'success' | 'error') => ({
-    position: 'fixed' as const,
-    top: '24px',
-    right: '24px',
-    backgroundColor: type === 'success' ? '#052e16' : '#1a0a0a',
-    border: `1px solid ${type === 'success' ? '#14532d' : '#3f1515'}`,
-    color: type === 'success' ? '#4ade80' : '#f87171',
-    padding: '12px 18px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontFamily: "'DM Mono', monospace",
-    zIndex: 1000,
-  }),
-};
-
-// Gmail SVG logo
 function GmailLogo() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -130,12 +15,13 @@ function GmailLogo() {
   );
 }
 
+import { useGmailStatusQuery, useConnectGmailMutation, useDisconnectGmailMutation } from '../app/data/google';
+
 export default function Integrations() {
   const [searchParams] = useSearchParams();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // TanStack React Query Hooks for fetching connection status automatically
-  const { data, isLoading, error } = useGmailStatusQuery();
+  const { data, isLoading } = useGmailStatusQuery();
   const connectMutation = useConnectGmailMutation();
   const disconnectMutation = useDisconnectGmailMutation();
 
@@ -177,60 +63,51 @@ export default function Integrations() {
   }
 
   return (
-    <div style={styles.page}>
+    <div className="p-8 bg-zinc-950 min-h-screen">
       {toast && (
-        <div style={styles.toast(toast.type)}>{toast.message}</div>
+        <div className={`fixed top-6 right-6 px-4 py-3 rounded-lg text-sm font-mono z-50 border ${toast.type === 'success' ? 'bg-emerald-950 border-emerald-900 text-emerald-400' : 'bg-red-950 border-red-900 text-red-400'}`}>
+          {toast.message}
+        </div>
       )}
 
-      <h1 style={styles.heading}>Integrations</h1>
-      <p style={styles.subheading}>Connect your accounts to sync and manage emails.</p>
+      <h1 className="text-2xl font-semibold mb-2 text-zinc-100 font-sans tracking-tight">Integrations</h1>
+      <p className="text-sm text-zinc-400 mb-10 font-sans">Connect your accounts to sync and manage emails.</p>
 
-      <div style={styles.card}>
-        <div style={styles.cardHeader}>
-          <div style={styles.gmailIcon}><GmailLogo /></div>
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-md flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+            <GmailLogo />
+          </div>
           <div>
-            <div style={styles.cardTitle}>Gmail</div>
-            <div style={styles.cardDesc}>Sync your inbox and reply to threads.</div>
+            <div className="font-semibold text-zinc-100 font-sans text-sm">Gmail</div>
+            <div className="text-xs text-zinc-500 font-sans">Sync your inbox and reply to threads.</div>
           </div>
         </div>
 
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-             <div className="skeleton-line" style={{ width: '60%', height: '14px' }} />
-             <div className="skeleton-line" style={{ width: '120px', height: '36px', borderRadius: '8px' }} />
-             <style>{`
-              @keyframes shimmer {
-                0% { background-position: -400px 0; }
-                100% { background-position: 400px 0; }
-              }
-              .skeleton-line {
-                background: #21262d;
-                background-image: linear-gradient(90deg, #21262d 0px, #30363d 40px, #21262d 80px);
-                background-size: 600px;
-                animation: shimmer 1.5s infinite linear;
-                border-radius: 4px;
-              }
-             `}</style>
+          <div className="flex flex-col gap-3 mt-2 animate-pulse">
+            <div className="h-3 bg-zinc-800 rounded w-3/5" />
+            <div className="h-9 bg-zinc-800 rounded-lg w-32" />
           </div>
         ) : status === 'connected' ? (
           <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={styles.connectedBadge}>
-                <div style={styles.dot} />
+            <div className="flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 bg-emerald-950 text-emerald-400 border border-emerald-800 text-[11px] font-mono px-3 py-1 rounded-full">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 Connected
               </div>
-              <span style={styles.email}>{email}</span>
+              <span className="text-xs text-zinc-500 font-mono">{email}</span>
             </div>
-            <button style={styles.disconnectBtn} onClick={handleDisconnect} disabled={disconnectMutation.isPending}>
+            <button onClick={handleDisconnect} disabled={disconnectMutation.isPending} className="self-start text-red-400 border border-zinc-700 text-xs px-3 py-2 rounded-lg hover:border-red-800 transition font-mono">
               Disconnect
             </button>
           </>
         ) : (
           <>
-            <div style={{ fontSize: '12px', color: '#4b5563', lineHeight: '1.7' }}>
+            <div className="text-sm text-zinc-500 font-sans leading-relaxed">
               Connect your Gmail account to sync emails and reply to threads directly from this dashboard.
             </div>
-            <button style={styles.connectBtn} onClick={handleConnect} disabled={connectMutation.isPending}>
+            <button onClick={handleConnect} disabled={connectMutation.isPending} className="self-start flex items-center gap-2 bg-white text-black font-semibold text-sm px-4 py-2 rounded-lg hover:bg-zinc-100 transition font-sans">
               <GmailLogo />
               Connect Gmail
             </button>
