@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+import Messages from './pages/Messages';
+import Integrations from './pages/Integrations';
+import Login from './views/Login';
 
-function App() {
-  const [count, setCount] = useState(0)
+function ProtectedLayout() {
+  const token = localStorage.getItem('access_token');
+  if (!token) return <Navigate to="/login" replace />;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0a0a0a' }}>
+      <Sidebar />
+      <main style={{ flex: 1, overflow: 'auto' }}>
+        <Routes>
+          <Route path="/dashboard"    element={<Dashboard />} />
+          <Route path="/messages"     element={<Messages />} />
+          <Route path="/integrations" element={<Integrations />} />
+          <Route path="*"             element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/*"     element={<ProtectedLayout />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

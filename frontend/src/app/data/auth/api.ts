@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { AuthResponse, LoginRequest } from './types';
 
+export interface GmailStatusResponse {
+  status: 'connected' | 'not_connected';
+  message: string;
+  google_user_email?: string;
+  last_synced_at?: string;
+  synced_days?: number;
+}
+
 export const apiClient = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
@@ -35,6 +43,21 @@ export const authApi = {
 
   me: async (): Promise<any> => {
     const response = await apiClient.get('/me');
+    return response.data;
+  },
+
+  connectGmail: async (): Promise<{ message: string; auth_url: string }> => {
+    const response = await apiClient.get('/gmail/connect');
+    return response.data;
+  },
+
+  getGmailStatus: async (): Promise<GmailStatusResponse> => {
+    const response = await apiClient.get('/gmail/status');
+    return response.data;
+  },
+
+  disconnectGmail: async (): Promise<{ message: string }> => {
+    const response = await apiClient.delete('/gmail/disconnect');
     return response.data;
   },
 };
