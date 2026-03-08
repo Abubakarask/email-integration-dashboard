@@ -4,14 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
 import { authApi, LoginRequestSchema, LoginRequest, RegisterRequestSchema, RegisterRequest } from '../app/data/auth';
 import { useNavigate } from 'react-router-dom';
-import './Login.css';
 
 export default function Login() {
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLogin, setIsLogin]   = useState(true);
 
-  // Define two separated forms so we can distinctively match validation
   const {
     register: registerLogin,
     handleSubmit: handleLoginSubmit,
@@ -34,9 +32,9 @@ export default function Login() {
     setErrorMsg(null);
     setIsLogin(loginMode);
     if (loginMode) {
-      resetSignup(); // clear signup fields
+      resetSignup();
     } else {
-      resetLogin();  // clear login fields
+      resetLogin();
     }
   };
 
@@ -77,124 +75,132 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-glass-card">
-        <div className="login-header">
-          <h1>{isLogin ? 'Welcome Back' : 'Create Account'}</h1>
-          <p>{isLogin ? 'Login to your account to continue' : 'Sign up to get started'}</p>
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 w-full max-w-sm relative z-10">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-zinc-100 mb-2">
+            {isLogin ? 'Welcome Back' : 'Create Account'}
+          </h1>
+          <p className="text-sm text-zinc-400">
+            {isLogin ? 'Login to your account to continue' : 'Sign up to get started'}
+          </p>
         </div>
 
-        {errorMsg && <div className="login-error-alert">{errorMsg}</div>}
+        {errorMsg && (
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg text-center">
+            {errorMsg}
+          </div>
+        )}
 
         {isLogin ? (
-          <form onSubmit={handleLoginSubmit(onLogin)} className="login-form">
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={20} />
+          <form onSubmit={handleLoginSubmit(onLogin)} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-xs font-mono text-zinc-400 mb-1">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
                   {...registerLogin('email')}
-                  className={loginErrors.email ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${loginErrors.email ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {loginErrors.email && <span className="error-text">{loginErrors.email.message}</span>}
+              {loginErrors.email && <span className="text-xs text-red-500 mt-1 block">{loginErrors.email.message}</span>}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <div className="input-wrapper">
-                <Lock className="input-icon" size={20} />
+            <div>
+              <label htmlFor="password" className="block text-xs font-mono text-zinc-400 mb-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   {...registerLogin('password')}
-                  className={loginErrors.password ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${loginErrors.password ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {loginErrors.password && <span className="error-text">{loginErrors.password.message}</span>}
+              {loginErrors.password && <span className="text-xs text-red-500 mt-1 block">{loginErrors.password.message}</span>}
             </div>
 
-            <button type="submit" disabled={isSubmittingLogin} className="submit-button">
+            <button type="submit" disabled={isSubmittingLogin} className="w-full bg-cyan-400 text-black font-semibold text-sm rounded-lg py-2.5 hover:bg-cyan-300 transition flex items-center justify-center mt-6">
               {isSubmittingLogin ? (
-                <span className="button-content">
-                  <Loader2 className="spinner" size={20} /> Sign In
-                </span>
+                <>
+                  <Loader2 className="animate-spin mr-2" size={16} /> Sign In
+                </>
               ) : (
                 'Sign In'
               )}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleSignupSubmit(onSignup)} className="login-form">
-            <div className="form-group">
-              <label htmlFor="name">Full Name</label>
-              <div className="input-wrapper">
-                <User className="input-icon" size={20} />
+          <form onSubmit={handleSignupSubmit(onSignup)} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-xs font-mono text-zinc-400 mb-1">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="name"
                   type="text"
                   placeholder="John Doe"
                   {...registerSignup('name')}
-                  className={signupErrors.name ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${signupErrors.name ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {signupErrors.name && <span className="error-text">{signupErrors.name.message}</span>}
+              {signupErrors.name && <span className="text-xs text-red-500 mt-1 block">{signupErrors.name.message}</span>}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="signup-email">Email</label>
-              <div className="input-wrapper">
-                <Mail className="input-icon" size={20} />
+            <div>
+              <label htmlFor="signup-email" className="block text-xs font-mono text-zinc-400 mb-1">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="signup-email"
                   type="email"
                   placeholder="you@example.com"
                   {...registerSignup('email')}
-                  className={signupErrors.email ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${signupErrors.email ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {signupErrors.email && <span className="error-text">{signupErrors.email.message}</span>}
+              {signupErrors.email && <span className="text-xs text-red-500 mt-1 block">{signupErrors.email.message}</span>}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="signup-password">Password</label>
-              <div className="input-wrapper">
-                <Lock className="input-icon" size={20} />
+            <div>
+              <label htmlFor="signup-password" className="block text-xs font-mono text-zinc-400 mb-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="signup-password"
                   type="password"
                   placeholder="••••••••"
                   {...registerSignup('password')}
-                  className={signupErrors.password ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${signupErrors.password ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {signupErrors.password && <span className="error-text">{signupErrors.password.message}</span>}
+              {signupErrors.password && <span className="text-xs text-red-500 mt-1 block">{signupErrors.password.message}</span>}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password_confirmation">Confirm Password</label>
-              <div className="input-wrapper">
-                <Lock className="input-icon" size={20} />
+            <div>
+              <label htmlFor="password_confirmation" className="block text-xs font-mono text-zinc-400 mb-1">Confirm Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
                 <input
                   id="password_confirmation"
                   type="password"
                   placeholder="••••••••"
                   {...registerSignup('password_confirmation')}
-                  className={signupErrors.password_confirmation ? 'input-error' : ''}
+                  className={`w-full bg-zinc-800 border ${signupErrors.password_confirmation ? 'border-red-500' : 'border-zinc-700'} rounded-lg px-4 py-2.5 pl-10 text-zinc-100 text-sm focus:outline-none focus:border-cyan-400`}
                 />
               </div>
-              {signupErrors.password_confirmation && <span className="error-text">{signupErrors.password_confirmation.message}</span>}
+              {signupErrors.password_confirmation && <span className="text-xs text-red-500 mt-1 block">{signupErrors.password_confirmation.message}</span>}
             </div>
 
-            <button type="submit" disabled={isSubmittingSignup} className="submit-button">
+            <button type="submit" disabled={isSubmittingSignup} className="w-full bg-cyan-400 text-black font-semibold text-sm rounded-lg py-2.5 hover:bg-cyan-300 transition flex items-center justify-center mt-6">
               {isSubmittingSignup ? (
-                <span className="button-content">
-                  <Loader2 className="spinner" size={20} /> Creating Account...
-                </span>
+                <>
+                  <Loader2 className="animate-spin mr-2" size={16} /> Creating Account...
+                </>
               ) : (
                 'Sign Up'
               )}
@@ -202,18 +208,14 @@ export default function Login() {
           </form>
         )}
 
-        <div className="login-footer">
+        <div className="mt-6 text-center text-sm text-zinc-400">
           {isLogin ? (
-            <p>Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); toggleMode(false); }}>Create an account</a></p>
+            <p>Don't have an account? <span className="text-cyan-400 hover:underline cursor-pointer ml-1" onClick={() => toggleMode(false)}>Create an account</span></p>
           ) : (
-            <p>Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); toggleMode(true); }}>Sign In</a></p>
+            <p>Already have an account? <span className="text-cyan-400 hover:underline cursor-pointer ml-1" onClick={() => toggleMode(true)}>Sign In</span></p>
           )}
         </div>
       </div>
-      
-      {/* Decorative background elements */}
-      <div className="blob blob-1"></div>
-      <div className="blob blob-2"></div>
     </div>
   );
 }
