@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import ReplyComposer from './ReplyComposer';
 import { apiClient as api } from '../../app/data/auth/api';
+import { PRIORITY_CONFIG } from './ThreadList'; // To reuse PRIORITY_CONFIG
 
 export default function ThreadDetail({ thread, onReply, onBack }: { thread: any, onReply: () => void, onBack: () => void }) {
   const [detail, setDetail]   = useState<any>(null);
@@ -60,7 +61,21 @@ export default function ThreadDetail({ thread, onReply, onBack }: { thread: any,
 
       {/* Thread header */}
       <div className="px-6 py-4 border-b border-zinc-800 shrink-0">
-        <div className="text-base font-semibold text-zinc-100 mb-1">{detail?.subject || '(no subject)'}</div>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="text-base font-semibold text-zinc-100">{detail?.subject || '(no subject)'}</div>
+          {detail?.priority && (
+            <span
+              className="font-mono text-[10px] px-2 py-0.5 rounded-full border shrink-0"
+              style={{
+                color: PRIORITY_CONFIG[detail.priority]?.color,
+                backgroundColor: PRIORITY_CONFIG[detail.priority]?.bg,
+                borderColor: PRIORITY_CONFIG[detail.priority]?.color + '40',
+              }}
+            >
+              {PRIORITY_CONFIG[detail.priority]?.label}
+            </span>
+          )}
+        </div>
         <div className="font-mono text-xs text-zinc-500 mt-1">
           {detail?.participants?.join(' · ')} · {detail?.message_count} messages
         </div>

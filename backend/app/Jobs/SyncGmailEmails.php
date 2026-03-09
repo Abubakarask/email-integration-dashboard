@@ -233,6 +233,10 @@ class SyncGmailEmails implements ShouldQueue
             ]
         );
 
+        // Classify thread priority
+        $priority = $this->classifyThread($thread, $messages);
+        $thread->update(['priority' => $priority]);
+
         // Upsert each message in the thread
         foreach ($messages as $msg) {
             $this->upsertMessage($thread, $msg);
@@ -391,5 +395,75 @@ class SyncGmailEmails implements ShouldQueue
             fn($addr) => $this->parseEmailAddress(trim($addr)),
             explode(',', $raw)
         );
+    }
+
+    /**
+     * Rule-based email priority classification.
+     * No external API calls — all processing stays on server.
+     * Privacy-safe for confidential business email content.
+     *
+     * @param EmailThread $thread
+     * @param array $messages  raw messages array from Gmail API response
+     * @return string  urgent | followup | resolved
+     */
+    private function classifyThread(EmailThread $thread, array $messages): string
+    {
+        try {
+            $subject = strtolower($thread->subject ?? '');
+            
+            // Fix: $messages[0]['payload'] is an array. We need a string.
+            // A simple fix for classification is to just use the snippet instead or specifically parse
+            $firstBody = '';
+            if (!empty($messages[0]['payload']['body']['data'])) {
+                $firstBody = \base64_decode(strtr($messages[0]['payload']['body']['data'], '-_', '+/'));
+            } else if (!empty($messages[0]['payload']['parts'][0]['body']['data'])) {
+                // simple multipart fallback
+                $firstBody = \base64_decode(strtr($messages[0]['payload']['parts'][0]['body']['data'], '-_', '+/'));
+            }
+            $firstBody = strip_tags($firstBody);
+            
+            $snippet = strtolower($thread->snippet ?? '');
+
+            $text = $subject . ' ' . $snippet . ' ' . strtolower($firstBody);
+
+            $urgentKeywords = [
+                'urgent', 'urgently', 'asap', 'immediately', 'critical',
+                'emergency', 'unacceptable', 'furious', 'angry', 'frustrated',
+                'lawsuit', 'legal action', 'attorney', 'lawyer',
+                'refund', 'cancel', 'cancellation', 'terminate', 'termination',
+                'not working', 'broken', 'outage', 'down', 'failed', 'failure',
+                'issue', 'problem', 'error', 'bug', 'crash',
+                'overdue', 'past due', 'unpaid', 'missed deadline',
+                'complaint', 'escalate', 'escalation', 'disappointed',
+                'never received', 'still waiting', 'no response',
+            ];
+
+            $resolvedKeywords = [
+                'thank you', 'thanks', 'thank you so much', 'many thanks',
+                'resolved', 'resolution', 'fixed', 'sorted', 'all good',
+                'appreciate', 'appreciated', 'grateful', 'gratitude',
+                'perfect', 'great', 'excellent', 'wonderful', 'awesome',
+                'closed', 'done', 'completed', 'confirmed', 'received',
+                'no further', 'no longer', 'all set', 'good to go',
+            ];
+
+            // Check urgent first
+            foreach ($urgentKeywords as $keyword) {
+                if (str_contains($text, $keyword)) {
+                    return 'urgent';
+                }
+            }
+
+            // Then check resolved
+            foreach ($resolvedKeywords as $keyword) {
+                if (str_contains($text, $keyword)) {
+                    return 'resolved';
+                }
+            }
+
+            return 'followup';
+        } catch (\Exception $e) {
+            return 'followup';
+        }
     }
 }

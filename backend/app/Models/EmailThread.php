@@ -16,6 +16,7 @@ class EmailThread extends Model
         'participants',       // array — ["alice@gmail.com", "bob@co.com"]
         'message_count',      // int
         'last_message_at',    // timestamp|null — sort thread list by this
+        'priority',           // string - urgent | followup | resolved
     ];
 
     protected $casts = [

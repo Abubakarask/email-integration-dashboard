@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 function formatDate(iso: string) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -7,6 +9,27 @@ function formatDate(iso: string) {
   if (diffDays < 7)  return d.toLocaleDateString([], { weekday: 'short' });
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
+
+export const PRIORITY_CONFIG: Record<string, { color: string, bg: string, label: string, dotClass: string }> = {
+  urgent: {
+    color: '#ef4444',       // red
+    bg: 'rgba(239,68,68,0.1)',
+    label: 'Urgent',
+    dotClass: 'bg-red-500',
+  },
+  followup: {
+    color: '#f59e0b',       // amber
+    bg: 'rgba(245,158,11,0.1)',
+    label: 'Follow-up',
+    dotClass: 'bg-amber-400',
+  },
+  resolved: {
+    color: '#22c55e',       // green
+    bg: 'rgba(34,197,94,0.1)',
+    label: 'Resolved',
+    dotClass: 'bg-green-500',
+  },
+};
 
 export default function ThreadList({ 
   threads, 
@@ -25,8 +48,33 @@ export default function ThreadList({
   meta: any, 
   onPageChange: (updater: (p: number) => number) => void 
 }) {
+  const [filter, setFilter] = useState<'all' | 'urgent' | 'followup' | 'resolved'>('all');
+
+  const visibleThreads = filter === 'all'
+    ? threads
+    : threads.filter(t => t.priority === filter);
+
   return (
     <>
+      {/* Priority filter bar */}
+      <div className="flex gap-1 px-3 py-2 border-b border-zinc-800 shrink-0">
+        {(['all', 'urgent', 'followup', 'resolved'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`
+              font-mono text-xs px-2.5 py-1 rounded-md capitalize transition cursor-pointer
+              ${filter === f
+                ? 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/30'
+                : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+              }
+            `}
+          >
+            {f === 'all' ? 'All' : f}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="flex-1 overflow-y-auto w-full">
           {[1, 2, 3, 4, 5, 6, 7].map(i => (
@@ -40,24 +88,31 @@ export default function ThreadList({
             </div>
           ))}
         </div>
-      ) : threads.length === 0 ? (
+      ) : visibleThreads.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 font-mono text-xs text-zinc-500 text-center w-full">
-          No threads yet. Sync your inbox.
+          {threads.length === 0 ? 'No threads yet. Sync your inbox.' : 'No threads found for this priority.'}
         </div>
       ) : (
         <>
           <div className="flex-1 overflow-y-auto w-full">
-            {threads.map(thread => (
+            {visibleThreads.map(thread => (
               <div
                 key={thread.id}
                 className={`px-4 py-3.5 border-b border-zinc-800 cursor-pointer hover:bg-zinc-800/50 transition ${selected === thread.id ? 'bg-cyan-400/5 border-l-2 border-l-cyan-400' : 'border-l-2 border-l-transparent'}`}
                 onClick={() => onSelect(thread.id)}
               >
-                {/* Top row: participants + date */}
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-mono text-xs font-semibold text-zinc-100 truncate pr-2">
-                    {(thread.participants ?? []).slice(0, 2).join(', ')}
-                  </span>
+                {/* Top row: participants + date + priority */}
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: PRIORITY_CONFIG[thread.priority]?.color ?? '#f59e0b' }}
+                      title={PRIORITY_CONFIG[thread.priority]?.label}
+                    />
+                    <span className="font-mono text-xs font-semibold text-zinc-100 truncate pr-2">
+                      {(thread.participants ?? []).slice(0, 2).join(', ')}
+                    </span>
+                  </div>
                   <span className="font-mono text-xs text-zinc-600 shrink-0">{formatDate(thread.last_message_at)}</span>
                 </div>
 
