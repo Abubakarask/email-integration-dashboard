@@ -228,7 +228,7 @@ You can now visit the App locally, register your basic User Credentials via the 
 ---
 
 ## Demo Video
-[Watch the demo on Loom](https://www.loom.com/share/d8f3473ae1904b55aa2aedc0d1faeb15)
+[Watch the demo on Loom](https://www.loom.com/share/a6763d0f39294f6f8315e84836de1995)
 
 ---
 
