@@ -8,6 +8,7 @@ A full-stack industrial-minimal email integration dashboard providing real-time 
 - **Incremental Syncing**: Blazing fast `history.list` polling dropping the diff payload natively into Laravel instead of fetching entire history trees.
 - **Read & Manage Messages**: Master-detail two-panel layout routing. Safely scopes untrusted sandboxed HTML payloads natively inside secure styling viewports.
 - **Smart Inbox Triageing**: Highlights sender/receiver metadata uniquely along with the nested threaded `message_count`. 
+- **Offline Rule-Based Priority Tagging**: An explicit architectural decision to use a secure, rule-based PHP regex engine over a third-party AI API (like OpenAI) to categorize emails (Urgent, Follow-up, Resolved) completely offline. **No confidential business emails ever leave the server** to be processed by a third party, maximizing user privacy.
 - **Attachment Lazy-Loading**: Stores raw metadata during Inbox parsing (`{attachmentId, filename}`), fetching the binary stream `base64url` ONLY when a user deliberately attempts a download to reduce API overhead limits! 
 - **RFC 2822 Smart Reply Chain**: Crafts nested thread payload identifiers natively via `In-Reply-To`, `References`, and `threadId` metadata keeping inline conversational integrity when replying from the Dashboard.
 - **Responsive Views**: Operates natively in Desktop & Mobile.
@@ -163,16 +164,18 @@ Navigate to the `backend/` directory:
    ```bash
    composer install
    ```
-3. Set your internal SQLite logic:
+3. Configure your environment variables. Copy the example file and generate your application key:
    ```bash
-   touch database/database.sqlite
+   cp .env.example .env
    php artisan key:generate
    ```
-4. Run standard Database Tables and queue generation logic:
+4. **Configure your Database & Credentials:** Open `.env` and configure your credentials. Crucially, insert your `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` generated from the Google Cloud Console. Enable the *Gmail API*.
+5. Set your internal SQLite logic and prepare databases:
    ```bash
+   touch database/database.sqlite
    php artisan migrate
    ```
-5. Boot up the local webserver:
+6. Boot up the local webserver:
    ```bash
    php artisan serve
    ```
@@ -188,7 +191,12 @@ Navigate to the `frontend/` directory (separate terminal):
    ```bash
    npm install
    ```
-2. Run the Vite development server:
+2. Setup Frontend Environment:
+   ```bash
+   cp .env.example .env
+   ```
+   *(Ensure `VITE_API_URL` is pointing correctly to your Laravel backend)*
+3. Run the Vite development server:
    ```bash
    npm run dev
    ```
@@ -220,7 +228,7 @@ You can now visit the App locally, register your basic User Credentials via the 
 ---
 
 ## Demo Video
-[Watch the demo on Google Drive](YOUR_LINK_HERE)
+[Watch the demo on Loom](https://www.loom.com/share/d8f3473ae1904b55aa2aedc0d1faeb15)
 
 ---
 
